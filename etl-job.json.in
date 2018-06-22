@@ -1,0 +1,37 @@
+{
+    "jobName": "${JOB_NAME}", 
+    "jobQueue": "aws_demo_batch_job-queue", 
+    "jobDefinition": "aws_batch_tippecanoe", 
+    "parameters":   {
+        "s3inputzip": "${S3INPUTZIP}",
+        "s3outputdir": "${S3OUTPUTDIR}",
+        "tilesetname": "${TILESETNAME}"
+    }, 
+    "containerOverrides": {
+        "vcpus": 1,
+        "memory": 1024,
+        "command": [
+            "-o",
+            "Ref::s3outputdir",
+            "-t",
+            "Ref::tilesetname",
+            "Ref::s3inputzip"
+        ],
+        "environment": [
+            {
+                "name": "PATH", 
+                "value": "/home/tippecanoe/.nvm/versions/node/v8.11.3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+            },
+            {
+                "name": "NVM_DIR",
+                "value": "/home/tippecanoe/.nvm"
+            }
+        ]
+    }, 
+    "retryStrategy": {
+        "attempts": 1
+    }, 
+    "timeout": {
+        "attemptDurationSeconds": 600
+    }
+}
