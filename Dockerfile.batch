@@ -1,0 +1,58 @@
+#FROM   swisstopo/tippecanoe:latest
+FROM   swisstopo/tippecanoe:ubuntu
+
+USER root
+
+RUN apt-get update && apt-get install -y  bash zip unzip bzip2 tar python-pip && pip install -U pip wheel awscli
+
+
+
+ARG TIPPECANOE_RELEASE="1.30.0"
+
+#RUN useradd -ms /bin/bash tippecanoe
+RUN adduser tippecanoe #&& usermod -aG sudo tippecanoe # && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+#RUN adduser --group  sudo   tippecanoe && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+
+#RUN set -x ; \
+#  addgroup -g 1000  -S tippecanoe ; \
+#  adduser -u 1000 -D -S -G tippecanoe tippecanoe && exit 0 ; exit 1
+
+
+
+
+# ADD . /home/tippecanoe/
+# ADD dummy.sh /home/tippecanoe/dummy.sh
+COPY --chown=tippecanoe:tippecanoe data  /home/tippecanoe/data
+COPY --chown=tippecanoe:tippecanoe .   /home/tippecanoe
+WORKDIR /home/tippecanoe
+#ADD _bashrc  /home/tippecanoe/.bashrc
+RUN  chown -R tippecanoe  /home/tippecanoe
+
+USER tippecanoe
+# install nvm
+ RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.6/install.sh | bash \
+   && export NVM_DIR="$HOME/.nvm" \
+   && [ -s "$NVM_DIR/nvm.sh"  ] && \. "$NVM_DIR/nvm.sh" \
+   && [ -s "$NVM_DIR/bash_completion"  ] && \. "$NVM_DIR/bash_completion" \
+   && nvm install 8.11.3 \
+   && nvm alias default node && npm install
+   
+RUN mkdir tippecanoe &&  ln -s /usr/local/bin/tippecanoe /home/tippecanoe/tippecanoe/tippecanoe
+   
+#RUN "$NVM_DIR/versions/node/v8.11.3/bin/npm" install
+#RUN npm install
+
+# ENTRYPOINT ["/home/tippecanoe/dummy.sh"]
+# ENTRYPOINT ["/bin/bash"]
+#ENTRYPOINT ["/home/tippecanoe/process-tilesets.sh"]
+ADD fetch_and_run.sh /usr/local/bin/fetch_and_run.sh
+#ENTRYPOINT ["/usr/local/bin/fetch_and_run.sh"]
+
+ENTRYPOINT ["/home/tippecanoe/download-process-upload.sh"]
+
+
+
+#RUN /bin/bash
+
+
